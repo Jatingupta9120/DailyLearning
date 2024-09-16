@@ -5,6 +5,7 @@ const { auth, JWT_SECRET } = require('./auth.js');
 const { logger } = require('./logger.js');
 const bcrypt = require('bcryptjs');
 const { connectMongoose } = require('./db.js');
+const {z} =require('zod');
 // Create Express application
 const app = express();
 
@@ -52,6 +53,17 @@ app.post('/login', async function (req, res) {
 app.post('/signUp', async function (req, res) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const passwordMinLength = 8;
+    //Zod Validation implementation in nodejs
+    const requireBody=z.object({
+        email:z.toString().min(2).max(3).email(),
+        password:z.toString().password(),
+        name:z.toString()
+
+    })
+    //we will parse the data in zod there are two parse one is parse which will return the data with errors and success true or false while safeParse a Method which will return only the data=[] like this 
+
+    const parseData=requireBody.parse(req.body);
+    const parseDataWithSuccess=requireBody.safeParse(req.body);
     const { email, password } = req.body;
     if (!email || !emailRegex.test(email)) {
         return res.status(400).json({ message: 'Invalid email format' });
